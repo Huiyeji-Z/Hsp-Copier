@@ -31,7 +31,7 @@ $vpkArgs = @(
     "--packVersion", $Version,
     "--packDir", $publishDir,
     "--mainExe", "HspCopier.exe",
-    "--releaseDir", $releaseDir,
+    "--outputDir", $releaseDir,
     "--channel", $Channel
 )
 if (Test-Path $iconPath) {
