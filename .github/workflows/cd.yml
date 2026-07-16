@@ -45,6 +45,10 @@ jobs:
         shell: pwsh
         run: |
           choco install innosetup -y --no-progress
+          # Inno Setup 6.7.1 (choco) 不含简体中文（unofficial 语言），从官方仓库下载
+          $islUrl = "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/Unofficial/ChineseSimplified.isl"
+          $islDir = "C:\Program Files (x86)\Inno Setup 6\Languages"
+          Invoke-WebRequest -Uri $islUrl -OutFile (Join-Path $islDir "ChineseSimplified.isl")
           iscc installer\hsp-copier.iss /DMyAppVersion=${{ steps.ver.outputs.version }}
 
       - name: Upload GitHub Release
