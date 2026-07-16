@@ -1,0 +1,78 @@
+<Window x:Class="HspCopier.App.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="设置 - Hsp Copier"
+        Height="540" Width="420"
+        WindowStartupLocation="CenterOwner"
+        Background="#FFF5F5F7">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="外观" FontWeight="SemiBold" Margin="0,0,0,8"/>
+
+        <StackPanel Grid.Row="1" Margin="0,0,0,12">
+            <TextBlock Text="背景模式"/>
+            <ComboBox x:Name="BackdropCombo" Margin="0,4,0,0">
+                <ComboBoxItem Content="毛玻璃 (Acrylic)" Tag="Acrylic"/>
+            </ComboBox>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Margin="0,0,0,12">
+            <TextBlock Text="背景透明度"/>
+            <Slider x:Name="OpacitySlider" Minimum="0.2" Maximum="1.0" Value="0.85" TickFrequency="0.05" IsSnapToTickEnabled="True" ValueChanged="OpacitySlider_ValueChanged"/>
+            <Grid>
+                <TextBlock Text="浅" FontSize="11" Foreground="#FF888888" HorizontalAlignment="Left"/>
+                <TextBlock Text="深" FontSize="11" Foreground="#FF888888" HorizontalAlignment="Right"/>
+            </Grid>
+        </StackPanel>
+
+        <TextBlock Grid.Row="3" Text="动画" FontWeight="SemiBold" Margin="0,0,0,8"/>
+        <StackPanel Grid.Row="4" Margin="0,0,0,12">
+            <TextBlock Text="变形动画"/>
+            <ComboBox x:Name="AnimationCombo" Margin="0,4,0,0">
+                <ComboBoxItem Content="缩放渐变" Tag="ScaleFade"/>
+            </ComboBox>
+        </StackPanel>
+
+        <TextBlock Grid.Row="5" Text="悬浮球" FontWeight="SemiBold" Margin="0,0,0,8"/>
+        <StackPanel Grid.Row="6" Margin="0,0,0,12">
+            <TextBlock Text="动画风格"/>
+            <ComboBox x:Name="BallStyleCombo" Margin="0,4,0,0">
+                <ComboBoxItem Content="卡通形象" Tag="Minion"/>
+                <ComboBoxItem Content="天气动画" Tag="Weather"/>
+            </ComboBox>
+            <TextBlock Text="天气模式会自动检测网络与定位,每 30 秒更新"
+                       FontSize="11" Foreground="#FF888888" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="7" Text="剪贴板" FontWeight="SemiBold" Margin="0,0,0,8"/>
+        <StackPanel Grid.Row="8" Margin="0,0,0,12">
+            <DockPanel Margin="0,0,0,4">
+                <TextBlock Text="最大记录数"/>
+                <TextBlock x:Name="MaxItemsText" Text="10" HorizontalAlignment="Right"/>
+            </DockPanel>
+            <Slider x:Name="MaxItemsSlider" Minimum="5" Maximum="50" Value="10" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="MaxItemsSlider_ValueChanged"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="9" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+            <Button x:Name="CheckUpdateButton" Content="检查更新" Padding="12,4" Margin="0,0,8,0" Click="CheckUpdate_Click"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="10" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="CancelButton" Content="取消" Padding="20,4" Margin="0,12,8,0" Click="Cancel_Click"/>
+            <Button x:Name="SaveButton" Content="保存" Padding="20,4" Margin="0,12,0,0" Click="Save_Click" IsDefault="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

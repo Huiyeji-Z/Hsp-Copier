@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>HspCopier.App</RootNamespace>
+    <AssemblyName>HspCopier</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\hspcopier.ico</ApplicationIcon>
+    <Version>0.1.0</Version>
+    <Company>HspCopier</Company>
+    <Product>Hsp Copier</Product>
+    <Copyright>Copyright (c) 2026 HspCopier</Copyright>
+  </PropertyGroup>
+
+  <!-- 单文件打包：在 Release 下启用 -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Velopack" Version="0.0.359" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\hspcopier.ico">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HspCopier.Animations\HspCopier.Animations.csproj" />
+    <ProjectReference Include="..\HspCopier.Core\HspCopier.Core.csproj" />
+    <ProjectReference Include="..\HspCopier.Services\HspCopier.Services.csproj" />
+    <ProjectReference Include="..\HspCopier.Shared\HspCopier.Shared.csproj" />
+    <ProjectReference Include="..\HspCopier.UI\HspCopier.UI.csproj" />
+    <ProjectReference Include="..\HspCopier.Win32\HspCopier.Win32.csproj" />
+  </ItemGroup>
+
+</Project>

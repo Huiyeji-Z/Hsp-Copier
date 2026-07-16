@@ -1,0 +1,59 @@
+name: CD
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install Velopack CLI
+        shell: pwsh
+        run: |
+          dotnet tool install -g vpk
+          echo "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Extract version from tag
+        id: ver
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          if ($tag -like "v*") { $tag = $tag.Substring(1) }
+          echo "version=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Publish single-file exe
+        shell: pwsh
+        run: |
+          .\tools\publish.ps1 -Version ${{ steps.ver.outputs.version }}
+
+      - name: Build Velopack packages
+        shell: pwsh
+        run: |
+          .\tools\velopack-pack.ps1 -Version ${{ steps.ver.outputs.version }}
+
+      - name: Build Inno Setup installer
+        shell: pwsh
+        run: |
+          choco install innosetup -y --no-progress
+          iscc installer\hsp-copier.iss /DMyAppVersion=${{ steps.ver.outputs.version }}
+
+      - name: Upload GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.ver.outputs.version }}
+          files: |
+            installer/output/*.exe
+            releases/*.vpk
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}

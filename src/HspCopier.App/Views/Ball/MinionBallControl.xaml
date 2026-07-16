@@ -1,0 +1,68 @@
+<UserControl x:Class="HspCopier.App.Views.Ball.MinionBallControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Width="64" Height="64">
+    <Grid x:Name="Root">
+        <!-- 深空脸:深紫蓝渐变 -->
+        <Ellipse Width="60" Height="60" Stroke="#FF3D2C8D" StrokeThickness="1">
+            <Ellipse.Fill>
+                <RadialGradientBrush Center="0.35,0.3" GradientOrigin="0.35,0.3" RadiusX="0.75" RadiusY="0.75">
+                    <GradientStop Color="#FF3A2E6E" Offset="0"/>
+                    <GradientStop Color="#FF251947" Offset="0.55"/>
+                    <GradientStop Color="#FF1B1B3A" Offset="1"/>
+                </RadialGradientBrush>
+            </Ellipse.Fill>
+            <!-- 微弱发光晕 -->
+            <Ellipse.Effect>
+                <DropShadowEffect Color="#FF9D4EDD" BlurRadius="8" ShadowDepth="0" Opacity="0.5"/>
+            </Ellipse.Effect>
+        </Ellipse>
+
+        <!-- 左眼白:银白 + 紫光晕 -->
+        <Ellipse x:Name="LeftEye" Width="16" Height="16" Margin="-22,-6,0,0" Fill="#FFF0F0FF">
+            <Ellipse.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform x:Name="LeftEyeScale" CenterX="8" CenterY="8" ScaleX="1" ScaleY="1"/>
+                    <TranslateTransform x:Name="LeftEyeTranslate" X="0" Y="0"/>
+                </TransformGroup>
+            </Ellipse.RenderTransform>
+            <Ellipse.Effect>
+                <DropShadowEffect Color="#FF9D4EDD" BlurRadius="4" ShadowDepth="0" Opacity="0.8"/>
+            </Ellipse.Effect>
+        </Ellipse>
+        <!-- 右眼白 -->
+        <Ellipse x:Name="RightEye" Width="16" Height="16" Margin="22,-6,0,0" Fill="#FFF0F0FF">
+            <Ellipse.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform x:Name="RightEyeScale" CenterX="8" CenterY="8" ScaleX="1" ScaleY="1"/>
+                    <TranslateTransform x:Name="RightEyeTranslate" X="0" Y="0"/>
+                </TransformGroup>
+            </Ellipse.RenderTransform>
+            <Ellipse.Effect>
+                <DropShadowEffect Color="#FF9D4EDD" BlurRadius="4" ShadowDepth="0" Opacity="0.8"/>
+            </Ellipse.Effect>
+        </Ellipse>
+
+        <!-- 左瞳孔:星河紫 -->
+        <Ellipse x:Name="LeftPupil" Width="7" Height="7" Margin="-22,-6,0,0" Fill="#FF9D4EDD">
+            <Ellipse.RenderTransform>
+                <TranslateTransform x:Name="LeftPupilTranslate" X="0" Y="0"/>
+            </Ellipse.RenderTransform>
+        </Ellipse>
+        <!-- 右瞳孔 -->
+        <Ellipse x:Name="RightPupil" Width="7" Height="7" Margin="22,-6,0,0" Fill="#FF9D4EDD">
+            <Ellipse.RenderTransform>
+                <TranslateTransform x:Name="RightPupilTranslate" X="0" Y="0"/>
+            </Ellipse.RenderTransform>
+        </Ellipse>
+
+        <!-- 嘴:霓虹粉 -->
+        <Path x:Name="Mouth" Width="12" Height="6" Margin="0,27,0,0" Stretch="Fill"
+              Stroke="#FFFF006E" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+              Data="M 0,3 L 12,3">
+            <Path.Effect>
+                <DropShadowEffect Color="#FFFF006E" BlurRadius="4" ShadowDepth="0" Opacity="0.7"/>
+            </Path.Effect>
+        </Path>
+    </Grid>
+</UserControl>

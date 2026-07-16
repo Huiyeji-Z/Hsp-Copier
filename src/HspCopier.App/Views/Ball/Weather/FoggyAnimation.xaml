@@ -1,0 +1,33 @@
+<UserControl x:Class="HspCopier.App.Views.Ball.Weather.FoggyAnimation"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Width="64" Height="64">
+    <UserControl.Resources>
+        <Storyboard x:Key="EnterStoryboard">
+            <DoubleAnimation Storyboard.TargetName="Root"
+                             Storyboard.TargetProperty="(UIElement.Opacity)"
+                             From="0" To="1" Duration="0:0:0.6"/>
+        </Storyboard>
+        <Storyboard x:Key="IdleStoryboard" RepeatBehavior="Forever" AutoReverse="True">
+            <DoubleAnimation Storyboard.TargetName="Band1" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" From="-4" To="4" Duration="0:0:5"/>
+            <DoubleAnimation Storyboard.TargetName="Band2" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" From="4" To="-4" Duration="0:0:6"/>
+            <DoubleAnimation Storyboard.TargetName="Band3" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" From="-3" To="3" Duration="0:0:7"/>
+            <DoubleAnimation Storyboard.TargetName="Band4" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" From="3" To="-3" Duration="0:0:5.5"/>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <Grid x:Name="Root">
+        <Rectangle x:Name="Band1" Width="60" Height="6" Margin="0,16,0,0" RadiusX="3" RadiusY="3" Fill="#33AAAAAA">
+            <Rectangle.RenderTransform><TranslateTransform X="0"/></Rectangle.RenderTransform>
+        </Rectangle>
+        <Rectangle x:Name="Band2" Width="56" Height="6" Margin="0,26,0,0" RadiusX="3" RadiusY="3" Fill="#44AAAAAA">
+            <Rectangle.RenderTransform><TranslateTransform X="0"/></Rectangle.RenderTransform>
+        </Rectangle>
+        <Rectangle x:Name="Band3" Width="58" Height="6" Margin="0,36,0,0" RadiusX="3" RadiusY="3" Fill="#33AAAAAA">
+            <Rectangle.RenderTransform><TranslateTransform X="0"/></Rectangle.RenderTransform>
+        </Rectangle>
+        <Rectangle x:Name="Band4" Width="54" Height="6" Margin="0,46,0,0" RadiusX="3" RadiusY="3" Fill="#44AAAAAA">
+            <Rectangle.RenderTransform><TranslateTransform X="0"/></Rectangle.RenderTransform>
+        </Rectangle>
+    </Grid>
+</UserControl>

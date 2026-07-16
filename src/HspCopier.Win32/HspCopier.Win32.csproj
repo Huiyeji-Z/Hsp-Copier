@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>HspCopier.Win32</RootNamespace>
+    <AssemblyName>HspCopier.Win32</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HspCopier.Core\HspCopier.Core.csproj" />
+    <ProjectReference Include="..\HspCopier.Shared\HspCopier.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

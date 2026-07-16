@@ -1,0 +1,73 @@
+<UserControl x:Class="HspCopier.App.Views.Ball.Weather.SnowyAnimation"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Width="64" Height="64">
+    <UserControl.Resources>
+        <Storyboard x:Key="EnterStoryboard">
+            <DoubleAnimation Storyboard.TargetName="Root"
+                             Storyboard.TargetProperty="(UIElement.Opacity)"
+                             From="0" To="1" Duration="0:0:0.5"/>
+            <DoubleAnimation Storyboard.TargetName="Cloud"
+                             Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                             From="-20" To="0" Duration="0:0:0.6">
+                <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+        <Storyboard x:Key="IdleStoryboard" RepeatBehavior="Forever">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Flake1" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)">
+                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:0"/>
+                <SplineDoubleKeyFrame Value="32" KeyTime="0:0:3" KeySpline="0.4,0 0.6,1"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Flake2" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)">
+                <LinearDoubleKeyFrame Value="-4" KeyTime="0:0:0"/>
+                <SplineDoubleKeyFrame Value="30" KeyTime="0:0:3.5" KeySpline="0.4,0 0.6,1"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Flake3" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)">
+                <LinearDoubleKeyFrame Value="-8" KeyTime="0:0:0"/>
+                <SplineDoubleKeyFrame Value="26" KeyTime="0:0:3" KeySpline="0.4,0 0.6,1"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Flake4" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)">
+                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:0"/>
+                <SplineDoubleKeyFrame Value="32" KeyTime="0:0:4" KeySpline="0.4,0 0.6,1"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Flake5" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)">
+                <LinearDoubleKeyFrame Value="-6" KeyTime="0:0:0"/>
+                <SplineDoubleKeyFrame Value="28" KeyTime="0:0:3.5" KeySpline="0.4,0 0.6,1"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Flake6" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)">
+                <LinearDoubleKeyFrame Value="-2" KeyTime="0:0:0"/>
+                <SplineDoubleKeyFrame Value="32" KeyTime="0:0:4" KeySpline="0.4,0 0.6,1"/>
+            </DoubleAnimationUsingKeyFrames>
+            <!-- 横向漂移 -->
+            <DoubleAnimation Storyboard.TargetName="Flake1" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" From="0" To="3" Duration="0:0:3" AutoReverse="True" RepeatBehavior="Forever"/>
+            <DoubleAnimation Storyboard.TargetName="Flake3" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" From="0" To="-3" Duration="0:0:3" AutoReverse="True" RepeatBehavior="Forever"/>
+            <DoubleAnimation Storyboard.TargetName="Flake5" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" From="0" To="2" Duration="0:0:3.5" AutoReverse="True" RepeatBehavior="Forever"/>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <Grid x:Name="Root">
+        <Path x:Name="Cloud" Width="40" Height="22" Margin="0,8,0,0" Fill="#FFB0B0BC" Stroke="#FF8A8A95" StrokeThickness="0.5"
+              Data="M 4,18 Q 4,8 14,8 Q 18,2 26,4 Q 36,2 38,12 Q 40,12 40,18 Z">
+            <Path.RenderTransform><TranslateTransform Y="0"/></Path.RenderTransform>
+        </Path>
+
+        <Ellipse x:Name="Flake1" Width="3" Height="3" Margin="-12,28,0,0" Fill="White">
+            <Ellipse.RenderTransform><TranslateTransform X="0" Y="0"/></Ellipse.RenderTransform>
+        </Ellipse>
+        <Ellipse x:Name="Flake2" Width="3" Height="3" Margin="-6,28,0,0" Fill="White">
+            <Ellipse.RenderTransform><TranslateTransform X="0" Y="0"/></Ellipse.RenderTransform>
+        </Ellipse>
+        <Ellipse x:Name="Flake3" Width="3" Height="3" Margin="0,28,0,0" Fill="White">
+            <Ellipse.RenderTransform><TranslateTransform X="0" Y="0"/></Ellipse.RenderTransform>
+        </Ellipse>
+        <Ellipse x:Name="Flake4" Width="3" Height="3" Margin="6,28,0,0" Fill="White">
+            <Ellipse.RenderTransform><TranslateTransform X="0" Y="0"/></Ellipse.RenderTransform>
+        </Ellipse>
+        <Ellipse x:Name="Flake5" Width="3" Height="3" Margin="12,28,0,0" Fill="White">
+            <Ellipse.RenderTransform><TranslateTransform X="0" Y="0"/></Ellipse.RenderTransform>
+        </Ellipse>
+        <Ellipse x:Name="Flake6" Width="3" Height="3" Margin="-9,32,0,0" Fill="White">
+            <Ellipse.RenderTransform><TranslateTransform X="0" Y="0"/></Ellipse.RenderTransform>
+        </Ellipse>
+    </Grid>
+</UserControl>

@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>HspCopier.Animations</RootNamespace>
+    <AssemblyName>HspCopier.Animations</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HspCopier.Core\HspCopier.Core.csproj" />
+    <ProjectReference Include="..\HspCopier.Shared\HspCopier.Shared.csproj" />
+    <ProjectReference Include="..\HspCopier.Win32\HspCopier.Win32.csproj" />
+  </ItemGroup>
+
+</Project>

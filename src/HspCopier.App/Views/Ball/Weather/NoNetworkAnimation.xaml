@@ -1,0 +1,44 @@
+<UserControl x:Class="HspCopier.App.Views.Ball.Weather.NoNetworkAnimation"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Width="64" Height="64">
+    <UserControl.Resources>
+        <Storyboard x:Key="EnterStoryboard">
+            <DoubleAnimation Storyboard.TargetName="Root"
+                             Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                             From="0.5" To="1" Duration="0:0:0.4">
+                <DoubleAnimation.EasingFunction><BackEase EasingMode="EaseOut" Amplitude="0.3"/></DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="Root"
+                             Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                             From="0.5" To="1" Duration="0:0:0.4">
+                <DoubleAnimation.EasingFunction><BackEase EasingMode="EaseOut" Amplitude="0.3"/></DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+        <Storyboard x:Key="IdleStoryboard" RepeatBehavior="Forever" AutoReverse="True">
+            <DoubleAnimation Storyboard.TargetName="Root"
+                             Storyboard.TargetProperty="(UIElement.Opacity)"
+                             From="0.55" To="1" Duration="0:0:1.2"/>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <Grid x:Name="Root" RenderTransformOrigin="0.5,0.5">
+        <Grid.RenderTransform>
+            <ScaleTransform ScaleX="1" ScaleY="1"/>
+        </Grid.RenderTransform>
+
+        <!-- wifi 主体:3 道弧 -->
+        <Path Width="40" Height="28" Margin="0,8,0,0" Stroke="#FFEF4444" StrokeThickness="2.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+              Data="M 2,24 A 18,18 0 0 1 38,24"/>
+        <Path Width="30" Height="20" Margin="0,12,0,0" Stroke="#FFEF4444" StrokeThickness="2.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+              Data="M 5,20 A 12,12 0 0 1 25,20"/>
+        <Path Width="18" Height="12" Margin="0,16,0,0" Stroke="#FFEF4444" StrokeThickness="2.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+              Data="M 7,8 A 6,6 0 0 1 13,8"/>
+
+        <!-- 底部圆点 -->
+        <Ellipse Width="4" Height="4" Margin="0,22,0,0" Fill="#FFEF4444"/>
+
+        <!-- 斜杠(表示禁用) -->
+        <Line X1="6" Y1="48" X2="58" Y2="16" Stroke="#FFEF4444" StrokeThickness="3" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+    </Grid>
+</UserControl>

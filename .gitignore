@@ -1,0 +1,17 @@
+# 编译产物
+bin/
+obj/
+publish/
+releases/
+installer/output/
+
+# IDE
+.vs/
+.idea/
+*.user
+*.suo
+
+# 临时
+*.tmp
+*.log
+.DS_Store

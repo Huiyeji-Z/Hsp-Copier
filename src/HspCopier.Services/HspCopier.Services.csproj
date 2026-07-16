@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>HspCopier.Services</RootNamespace>
+    <AssemblyName>HspCopier.Services</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="H.NotifyIcon.Wpf" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Velopack" Version="0.0.359" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HspCopier.Core\HspCopier.Core.csproj" />
+    <ProjectReference Include="..\HspCopier.Win32\HspCopier.Win32.csproj" />
+    <ProjectReference Include="..\HspCopier.Shared\HspCopier.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

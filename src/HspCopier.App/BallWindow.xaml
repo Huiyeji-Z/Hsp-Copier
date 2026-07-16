@@ -1,0 +1,16 @@
+<Window x:Class="HspCopier.App.BallWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="HspBall"
+        Height="64" Width="64"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ShowActivated="False"
+        MouseEnter="BallWindow_OnMouseEnter">
+    <Grid x:Name="RootGrid">
+        <ContentControl x:Name="BallHost"/>
+    </Grid>
+</Window>
