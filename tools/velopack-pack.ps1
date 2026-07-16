@@ -45,4 +45,4 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "==> Velopack release packaged to $releaseDir" -ForegroundColor Green
-Get-ChildItem $releaseDir -Filter "*.vpk" -ErrorAction SilentlyContinue | Format-Table Name, Length
+Get-ChildItem $releaseDir -ErrorAction SilentlyContinue | Format-Table Name, Length

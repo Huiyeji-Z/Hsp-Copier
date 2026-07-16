@@ -9,6 +9,8 @@ on:
 jobs:
   build-and-release:
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -57,7 +59,9 @@ jobs:
           tag_name: v${{ steps.ver.outputs.version }}
           files: |
             installer/output/*.exe
-            releases/*.vpk
+            releases/*.nupkg
+            releases/*-Setup.exe
+            releases/releases.*.json
           generate_release_notes: true
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}
