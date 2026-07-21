@@ -51,11 +51,18 @@ public sealed class UpdateService : IUpdateService
             try
             {
                 EnsureManager();
-                if (_mgr == null) return null;
+                if (_mgr == null)
+                {
+                    _logger.LogError("UpdateManager is null after EnsureManager; cannot check updates");
+                    StatusChanged?.Invoke(this, "检查更新失败");
+                    return null;
+                }
 
                 if (!IsInstalled)
                 {
-                    _logger.LogInformation("Not installed (dev mode), skip update check");
+                    _logger.LogInformation("Not installed (dev mode or non-Velopack install), skip update check. " +
+                        "Hint: client must be installed via Velopack Setup.exe, not Inno Setup, for online updates to work.");
+                    StatusChanged?.Invoke(this, "未通过 Velopack 安装");
                     return null;
                 }
 
@@ -63,13 +70,26 @@ public sealed class UpdateService : IUpdateService
 
                 // 调用 CheckForUpdatesAsync
                 var checkMethod = _updateManagerType?.GetMethod("CheckForUpdatesAsync", Type.EmptyTypes);
-                if (checkMethod == null) return null;
+                if (checkMethod == null)
+                {
+                    _logger.LogError("CheckForUpdatesAsync method not found on UpdateManager");
+                    return null;
+                }
                 var taskObj = checkMethod.Invoke(_mgr, null);
-                if (taskObj == null) return null;
+                if (taskObj == null)
+                {
+                    _logger.LogError("CheckForUpdatesAsync returned null task");
+                    return null;
+                }
 
                 // dynamic → object，避免反射 GetType() 被 binder 误解
                 object updateInfoObj = await (dynamic)taskObj;
-                if (updateInfoObj == null) return null;
+                if (updateInfoObj == null)
+                {
+                    _logger.LogInformation("Velopack CheckForUpdatesAsync returned null (no newer release or releases.win.json not found)");
+                    StatusChanged?.Invoke(this, "已是最新版本");
+                    return null;
+                }
 
                 // 读取 TargetFullRelease
                 var targetAsset = updateInfoObj.GetType().GetProperty("TargetFullRelease")?.GetValue(updateInfoObj);

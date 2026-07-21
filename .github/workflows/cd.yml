@@ -43,24 +43,23 @@ jobs:
         run: |
           .\tools\velopack-pack.ps1 -Version ${{ steps.ver.outputs.version }}
 
-      - name: Build Inno Setup installer
+      - name: Rename Velopack Setup.exe
         shell: pwsh
         run: |
-          choco install innosetup -y --no-progress
-          # Inno Setup 6.7.1 (choco) 不含简体中文语言文件，从官方仓库下载
-          $islUrl = "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/ChineseSimplified.isl"
-          $islDir = "C:\Program Files (x86)\Inno Setup 6\Languages"
-          Invoke-WebRequest -Uri $islUrl -OutFile (Join-Path $islDir "ChineseSimplified.isl")
-          iscc installer\hsp-copier.iss /DMyAppVersion=${{ steps.ver.outputs.version }}
+          $setup = Get-ChildItem releases -Filter "*-Setup.exe" | Select-Object -First 1
+          if ($setup) {
+            $newName = "HspCopier-${{ steps.ver.outputs.version }}-Setup.exe"
+            Rename-Item $setup.FullName $newName
+            Write-Host "Renamed to $newName"
+          }
 
       - name: Upload GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.ver.outputs.version }}
           files: |
-            installer/output/*.exe
+            releases/HspCopier-*-Setup.exe
             releases/*.nupkg
-            releases/*-Setup.exe
             releases/releases.*.json
           generate_release_notes: true
           draft: false

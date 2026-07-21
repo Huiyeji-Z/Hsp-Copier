@@ -22,17 +22,15 @@
 
 ## 安装
 
-### 方式一：下载安装包（推荐）
+### 下载安装包（推荐）
 
 1. 前往 [Releases 页面](https://github.com/Huiyeji-Z/Hsp-Copier/releases/latest)
-2. 下载 `hsp-copier-<版本>-setup.exe`
+2. 下载 `HspCopier-<版本>-Setup.exe`（Velopack 安装包）
 3. 双击运行，按向导完成安装（per-user 安装，无需管理员权限）
-4. 安装目录：`%LOCALAPPDATA%\Programs\HspCopier\`
-5. 可选：勾选"创建桌面快捷方式"
+4. 安装目录：`%LOCALAPPDATA%\HspCopier\`
+5. 在线更新功能依赖此安装方式（其他安装方式 `IsInstalled=false` 会跳过更新检查）
 
-### 方式二：便携模式
-
-下载 Release 中的 `*-full.nupkg`，配合 Velopack 命令行更新。
+> ⚠️ 不要用 Inno Setup 旧版安装包安装，那样 Velopack 不会注册安装元数据，无法在线更新。
 
 ## 使用说明
 
@@ -176,7 +174,6 @@
 
 - C# WPF .NET 8 self-contained single-file
 - Velopack（在线更新 + 安装包）
-- Inno Setup（Windows 安装包）
 - H.NotifyIcon（系统托盘）
 - ipinfo.io（IP 定位）+ Open-Meteo（天气）
 - Serilog（日志）
@@ -216,11 +213,8 @@ src/
 # 1. 单文件打包（dotnet publish self-contained single-file）
 .\tools\publish.ps1 -Version 0.1.0
 
-# 2. Velopack 更新包（生成 .nupkg 全量/增量包 + Setup.exe）
+# 2. Velopack 更新包 + 安装包（生成 .nupkg 全量/增量包 + Setup.exe）
 .\tools\velopack-pack.ps1 -Version 0.1.0
-
-# 3. Inno Setup 安装包
-iscc installer\hsp-copier.iss
 ```
 
 ### 自动发版（CD）
@@ -229,8 +223,8 @@ iscc installer\hsp-copier.iss
 
 1. `dotnet publish` 单文件 exe
 2. `vpk pack` 生成 `.nupkg` 全量/增量更新包 + `*-Setup.exe`
-3. `iscc` 生成 Inno Setup 安装包（自动从官方仓库下载简体中文语言文件）
-4. 上传至 GitHub Release：`*-setup.exe` + `*.nupkg` + `releases.*.json`
+3. 重命名 Setup.exe 为 `HspCopier-<版本>-Setup.exe`
+4. 上传至 GitHub Release：`HspCopier-*-Setup.exe` + `*.nupkg` + `releases.*.json`
 
 发版步骤：
 ```bash
