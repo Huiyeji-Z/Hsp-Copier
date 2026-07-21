@@ -11,7 +11,7 @@
     <AssemblyName>HspCopier</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\hspcopier.ico</ApplicationIcon>
-    <Version>0.2.6</Version>
+    <Version>0.2.7</Version>
     <Company>HspCopier</Company>
     <Product>Hsp Copier</Product>
     <Copyright>Copyright (c) 2026 HspCopier</Copyright>

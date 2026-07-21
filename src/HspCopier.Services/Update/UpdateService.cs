@@ -240,37 +240,28 @@ public sealed class UpdateService : IUpdateService
 
         try
         {
-            // 构造 GitHubSource
-            var sourcesAssembly = AppDomain.CurrentDomain.GetAssemblies()
-                .FirstOrDefault(a => a.GetName().Name == "Velopack.Sources")
-                ?? typeof(UpdateManager).Assembly;
-            var gitHubSourceType = sourcesAssembly.GetTypes().FirstOrDefault(t => t.Name == "GithubSource");
-            if (gitHubSourceType == null)
-            {
-                _ensureManagerError = "GithubSource type not found in assembly " + sourcesAssembly.FullName;
-                _logger.LogError("GithubSource type not found");
-                return;
-            }
-
-            // GithubSource 构造签名：(string repoUrl, string? accessToken, bool prerelease, IFileDownloader? downloader = null)
+            // Velopack 0.0.359: UpdateManager 构造签名是 (string url, ...可选参数)
+            // 直接传 GitHub Releases 的根 URL，不需要 GithubSource 对象
             var repoUrl = $"https://github.com/{AppConstants.GitHubOwner}/{AppConstants.GitHubRepo}";
-            object? source = null;
-            var ctor = gitHubSourceType.GetConstructors()
-                .FirstOrDefault(c => c.GetParameters().Length >= 3
-                    && c.GetParameters()[0].ParameterType == typeof(string));
+            _updateManagerType = typeof(UpdateManager);
+
+            // 优先匹配只接受 string 的构造函数
+            var ctor = _updateManagerType.GetConstructors()
+                .Where(c => c.GetParameters().Length >= 1
+                    && c.GetParameters()[0].ParameterType == typeof(string))
+                .OrderBy(c => c.GetParameters().Length)
+                .FirstOrDefault();
             if (ctor == null)
             {
-                _ensureManagerError = "GithubSource constructor not found";
-                _logger.LogError("GithubSource constructor not found");
+                _ensureManagerError = "UpdateManager constructor with string first parameter not found";
+                _logger.LogError("UpdateManager constructor with string first parameter not found");
                 return;
             }
-            var args = new List<object?> { repoUrl, null, false };
-            // 第 4 个可选参数 IFileDownloader 默认 null
-            while (args.Count < ctor.GetParameters().Length) args.Add(null);
-            source = ctor.Invoke(args.ToArray());
 
-            _updateManagerType = typeof(UpdateManager);
-            _mgr = Activator.CreateInstance(_updateManagerType, source);
+            var args = new List<object?> { repoUrl };
+            // 其余可选参数默认 null
+            while (args.Count < ctor.GetParameters().Length) args.Add(null);
+            _mgr = ctor.Invoke(args.ToArray());
         }
         catch (Exception ex)
         {
