@@ -138,7 +138,9 @@ public partial class SettingsWindow : Window
             var info = await _update.CheckForUpdatesAsync();
             if (info == null || !info.IsNewer)
             {
-                MessageBox.Show("已是最新版本。", "检查更新", MessageBoxButton.OK, MessageBoxImage.Information);
+                var diag = _update.GetDiagnostics();
+                MessageBox.Show($"未发现可升级的新版本。\n\n--- 诊断信息 ---\n{diag}",
+                    "检查更新", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
             {

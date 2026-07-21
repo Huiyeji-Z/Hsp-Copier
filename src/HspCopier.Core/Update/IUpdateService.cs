@@ -28,6 +28,9 @@ public interface IUpdateService
     /// <summary>下载并应用更新（fast-restart）。返回是否触发重启。</summary>
     Task<bool> DownloadAndApplyAsync(IProgress<int> progress, CancellationToken ct);
 
+    /// <summary>返回当前 UpdateManager 的诊断信息（用于排查"检查更新失败"问题）。</summary>
+    string GetDiagnostics();
+
     event EventHandler<int>? DownloadProgress;
 
     event EventHandler<string>? StatusChanged;

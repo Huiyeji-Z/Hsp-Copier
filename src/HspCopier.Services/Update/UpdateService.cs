@@ -3,6 +3,7 @@ namespace HspCopier.Services.Update;
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using HspCopier.Core.Constants;
@@ -23,6 +24,9 @@ public sealed class UpdateService : IUpdateService
     private readonly ILogger<UpdateService> _logger;
     private object? _mgr; // UpdateManager 实例（反射访问）
     private Type? _updateManagerType;
+    private string _lastStatus = "未检查";
+    private string? _lastError;
+    private string? _ensureManagerError;
 
     public UpdateService(ILogger<UpdateService> logger)
     {
@@ -53,6 +57,8 @@ public sealed class UpdateService : IUpdateService
                 EnsureManager();
                 if (_mgr == null)
                 {
+                    _lastStatus = "UpdateManager 未创建";
+                    _lastError = _ensureManagerError;
                     _logger.LogError("UpdateManager is null after EnsureManager; cannot check updates");
                     StatusChanged?.Invoke(this, "检查更新失败");
                     return null;
@@ -60,24 +66,29 @@ public sealed class UpdateService : IUpdateService
 
                 if (!IsInstalled)
                 {
+                    _lastStatus = "未通过 Velopack 安装";
                     _logger.LogInformation("Not installed (dev mode or non-Velopack install), skip update check. " +
                         "Hint: client must be installed via Velopack Setup.exe, not Inno Setup, for online updates to work.");
                     StatusChanged?.Invoke(this, "未通过 Velopack 安装");
                     return null;
                 }
 
+                _lastStatus = "正在检查更新...";
                 StatusChanged?.Invoke(this, "正在检查更新...");
 
                 // 调用 CheckForUpdatesAsync
                 var checkMethod = _updateManagerType?.GetMethod("CheckForUpdatesAsync", Type.EmptyTypes);
                 if (checkMethod == null)
                 {
+                    _lastStatus = "CheckForUpdatesAsync 方法未找到";
+                    _lastError = "_updateManagerType is null or method missing";
                     _logger.LogError("CheckForUpdatesAsync method not found on UpdateManager");
                     return null;
                 }
                 var taskObj = checkMethod.Invoke(_mgr, null);
                 if (taskObj == null)
                 {
+                    _lastStatus = "CheckForUpdatesAsync 返回 null task";
                     _logger.LogError("CheckForUpdatesAsync returned null task");
                     return null;
                 }
@@ -86,6 +97,7 @@ public sealed class UpdateService : IUpdateService
                 object updateInfoObj = await (dynamic)taskObj;
                 if (updateInfoObj == null)
                 {
+                    _lastStatus = "已是最新版本（或 releases.win.json 未找到）";
                     _logger.LogInformation("Velopack CheckForUpdatesAsync returned null (no newer release or releases.win.json not found)");
                     StatusChanged?.Invoke(this, "已是最新版本");
                     return null;
@@ -93,33 +105,80 @@ public sealed class UpdateService : IUpdateService
 
                 // 读取 TargetFullRelease
                 var targetAsset = updateInfoObj.GetType().GetProperty("TargetFullRelease")?.GetValue(updateInfoObj);
-                if (targetAsset == null) return null;
+                if (targetAsset == null)
+                {
+                    _lastStatus = "TargetFullRelease 为 null";
+                    return null;
+                }
 
                 // 提取版本（SemanticVersion → System.Version）
                 var semVer = targetAsset.GetType().GetProperty("Version")?.GetValue(targetAsset);
                 var targetVersion = ToSystemVersion(semVer);
+                var currentVersion = GetCurrentVersion();
+                var isNewer = IsNewerVersion(semVer, currentVersion);
+
+                _lastError = null;
 
                 var result = new CoreUpdateInfo
                 {
                     TargetVersion = targetVersion,
                     ReleaseNotes = GetPropertyAsString(targetAsset, "Notes") ?? string.Empty,
                     PublishedAt = GetPropertyAsDateTime(targetAsset, "PublishedAt") ?? DateTime.MinValue,
-                    IsNewer = IsNewerVersion(semVer, GetCurrentVersion()),
+                    IsNewer = isNewer,
                 };
 
-                StatusChanged?.Invoke(this, result.IsNewer
-                    ? $"发现新版本 {result.TargetVersion}"
-                    : "已是最新版本");
+                _lastStatus = isNewer ? $"发现新版本 {result.TargetVersion}" : "已是最新版本";
+                StatusChanged?.Invoke(this, _lastStatus);
 
                 return result;
             }
             catch (Exception ex)
             {
+                _lastError = ex.ToString();
+                _lastStatus = "检查更新失败";
                 _logger.LogError(ex, "Check updates failed");
                 StatusChanged?.Invoke(this, "检查更新失败");
                 return null;
             }
         });
+    }
+
+    public string GetDiagnostics()
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("=== UpdateService 诊断 ===");
+        sb.AppendLine($"时间: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        sb.AppendLine($"Repo: {AppConstants.GitHubOwner}/{AppConstants.GitHubRepo}");
+        sb.AppendLine($"RepoUrl: https://github.com/{AppConstants.GitHubOwner}/{AppConstants.GitHubRepo}");
+        sb.AppendLine($"App exe: {Environment.ProcessPath ?? "(null)"}");
+        sb.AppendLine();
+        sb.AppendLine($"UpdateManager 已创建: {_mgr != null}");
+        sb.AppendLine($"EnsureManager 错误: {_ensureManagerError ?? "(无)"}");
+        sb.AppendLine($"IsInstalled: {IsInstalled}");
+        sb.AppendLine($"最近状态: {_lastStatus}");
+        sb.AppendLine($"最近错误: {_lastError ?? "(无)"}");
+
+        if (_mgr != null)
+        {
+            try
+            {
+                var cur = GetCurrentVersion();
+                sb.AppendLine($"CurrentVersion: {cur?.ToString() ?? "(null)"}");
+            }
+            catch (Exception ex)
+            {
+                sb.AppendLine($"CurrentVersion 读取异常: {ex.Message}");
+            }
+        }
+
+        sb.AppendLine();
+        sb.AppendLine("=== 提示 ===");
+        sb.AppendLine("1. 日志位置: %APPDATA%\\HspCopier\\logs\\hspcopier-YYYYMMDD.log");
+        sb.AppendLine("2. 安装位置: %LOCALAPPDATA%\\HspCopier\\（应有 Update.exe 和 current\\ 子目录）");
+        sb.AppendLine("3. 若 IsInstalled=false，说明未通过 Velopack Setup.exe 安装");
+        sb.AppendLine("4. 若最近状态显示\"已是最新版本（或 releases.win.json 未找到）\"，请确认 GitHub Release 中存在 releases.win.json");
+
+        return sb.ToString();
     }
 
     public async Task<bool> DownloadAndApplyAsync(IProgress<int> progress, CancellationToken ct)
@@ -188,6 +247,7 @@ public sealed class UpdateService : IUpdateService
             var gitHubSourceType = sourcesAssembly.GetTypes().FirstOrDefault(t => t.Name == "GithubSource");
             if (gitHubSourceType == null)
             {
+                _ensureManagerError = "GithubSource type not found in assembly " + sourcesAssembly.FullName;
                 _logger.LogError("GithubSource type not found");
                 return;
             }
@@ -200,6 +260,7 @@ public sealed class UpdateService : IUpdateService
                     && c.GetParameters()[0].ParameterType == typeof(string));
             if (ctor == null)
             {
+                _ensureManagerError = "GithubSource constructor not found";
                 _logger.LogError("GithubSource constructor not found");
                 return;
             }
@@ -213,6 +274,7 @@ public sealed class UpdateService : IUpdateService
         }
         catch (Exception ex)
         {
+            _ensureManagerError = ex.ToString();
             _logger.LogError(ex, "EnsureManager failed");
         }
     }
