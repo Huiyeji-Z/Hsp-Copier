@@ -165,43 +165,28 @@ public sealed class UpdateService : IUpdateService
             var sourcesAssembly = AppDomain.CurrentDomain.GetAssemblies()
                 .FirstOrDefault(a => a.GetName().Name == "Velopack.Sources")
                 ?? typeof(UpdateManager).Assembly;
-            var gitHubSourceType = sourcesAssembly.GetTypes().FirstOrDefault(t => t.Name == "GitHubSource");
+            var gitHubSourceType = sourcesAssembly.GetTypes().FirstOrDefault(t => t.Name == "GithubSource");
             if (gitHubSourceType == null)
             {
-                _logger.LogError("GitHubSource type not found");
+                _logger.LogError("GithubSource type not found");
                 return;
             }
 
-            // 尝试两种构造签名：(owner, repo, accessToken) 或 (repoUrl, accessToken, prerelease)
+            // GithubSource 构造签名：(string repoUrl, string? accessToken, bool prerelease, IFileDownloader? downloader = null)
+            var repoUrl = $"https://github.com/{AppConstants.GitHubOwner}/{AppConstants.GitHubRepo}";
             object? source = null;
-            var ctors = gitHubSourceType.GetConstructors();
-            foreach (var c in ctors)
+            var ctor = gitHubSourceType.GetConstructors()
+                .FirstOrDefault(c => c.GetParameters().Length >= 3
+                    && c.GetParameters()[0].ParameterType == typeof(string));
+            if (ctor == null)
             {
-                var ps = c.GetParameters();
-                if (ps.Length == 3 && ps[2].ParameterType == typeof(string))
-                {
-                    source = c.Invoke(new object?[] { AppConstants.GitHubOwner, AppConstants.GitHubRepo, null });
-                    break;
-                }
-            }
-            if (source == null)
-            {
-                foreach (var c in ctors)
-                {
-                    var ps = c.GetParameters();
-                    if (ps.Length == 3)
-                    {
-                        var url = $"https://github.com/{AppConstants.GitHubOwner}/{AppConstants.GitHubRepo}";
-                        source = c.Invoke(new object?[] { url, null, false });
-                        break;
-                    }
-                }
-            }
-            if (source == null)
-            {
-                _logger.LogError("GitHubSource constructor not found");
+                _logger.LogError("GithubSource constructor not found");
                 return;
             }
+            var args = new List<object?> { repoUrl, null, false };
+            // 第 4 个可选参数 IFileDownloader 默认 null
+            while (args.Count < ctor.GetParameters().Length) args.Add(null);
+            source = ctor.Invoke(args.ToArray());
 
             _updateManagerType = typeof(UpdateManager);
             _mgr = Activator.CreateInstance(_updateManagerType, source);
