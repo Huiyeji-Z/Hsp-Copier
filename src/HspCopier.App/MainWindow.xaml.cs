@@ -2,6 +2,7 @@ namespace HspCopier.App;
 
 using System;
 using System.ComponentModel;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -42,6 +43,8 @@ public partial class MainWindow : Window
     private double _dragOffsetY;
     private DateTime _lastCloseClickTime;
     private System.Windows.Threading.DispatcherTimer? _closeHintTimer;
+    private DateTime _lastClearClickTime;
+    private System.Windows.Threading.DispatcherTimer? _clearHintTimer;
 
     public MainWindow(
         IWindowStateService windowState,
@@ -64,6 +67,16 @@ public partial class MainWindow : Window
         _logger = logger;
         _services = services;
         InitializeComponent();
+
+        // 显示版本号（优先使用 AssemblyInformationalVersion，可带 -alpha 后缀）
+        var asm = Assembly.GetEntryAssembly();
+        var ver = asm?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+                  ?? asm?.GetName().Version?.ToString()
+                  ?? "0.0.0";
+        // 去掉源码 commit hash 后缀（+后面的部分）
+        var plus = ver.IndexOf('+');
+        if (plus >= 0) ver = ver.Substring(0, plus);
+        VersionText.Text = "v" + ver;
 
         // 恢复上次窗口位置/尺寸（在 Show 之前设置，避免闪烁）
         RestoreWindowBounds();
@@ -449,6 +462,71 @@ public partial class MainWindow : Window
         CloseHintBorder.BeginAnimation(OpacityProperty, fadeOut);
     }
 
+    /// <summary>
+    /// 单条记录删除按钮：直接删除（不需要二次确认）。
+    /// </summary>
+    private void DeleteRecordButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.Tag is Guid id)
+        {
+            e.Handled = true;
+            _ = _history.RemoveAsync(id);
+        }
+    }
+
+    /// <summary>
+    /// 清空全部记录按钮：2 秒内再次点击则真正清空，否则显示浮动提示。
+    /// </summary>
+    private void ClearAllButton_Click(object sender, RoutedEventArgs e)
+    {
+        if ((DateTime.Now - _lastClearClickTime).TotalSeconds < 2)
+        {
+            HideClearHint();
+            _ = _history.ClearAsync();
+            return;
+        }
+        _lastClearClickTime = DateTime.Now;
+        ShowClearHint();
+    }
+
+    private void ShowClearHint()
+    {
+        ClearHintBorder.Visibility = Visibility.Visible;
+
+        var fadeIn = new System.Windows.Media.Animation.DoubleAnimation
+        {
+            From = 0,
+            To = 1,
+            Duration = TimeSpan.FromMilliseconds(180),
+        };
+        ClearHintBorder.BeginAnimation(OpacityProperty, fadeIn);
+
+        _clearHintTimer?.Stop();
+        _clearHintTimer = new System.Windows.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(2),
+        };
+        _clearHintTimer.Tick += (_, _) =>
+        {
+            _clearHintTimer.Stop();
+            HideClearHint();
+        };
+        _clearHintTimer.Start();
+    }
+
+    private void HideClearHint()
+    {
+        _clearHintTimer?.Stop();
+        var fadeOut = new System.Windows.Media.Animation.DoubleAnimation
+        {
+            From = ClearHintBorder.Opacity,
+            To = 0,
+            Duration = TimeSpan.FromMilliseconds(220),
+        };
+        fadeOut.Completed += (_, _) => ClearHintBorder.Visibility = Visibility.Collapsed;
+        ClearHintBorder.BeginAnimation(OpacityProperty, fadeOut);
+    }
+
     private void SettingsButton_Click(object sender, RoutedEventArgs e)
     {
         var win = _services.GetRequiredService<SettingsWindow>();
@@ -470,10 +548,11 @@ public partial class MainWindow : Window
 
     private object BuildItemContainer(ClipboardRecord r)
     {
-        // 行根容器：左侧类型色条 + 右侧内容
+        // 行根容器：左侧类型色条 + 中间内容 + 右侧删除按钮
         var row = new Grid();
         row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(3) });
         row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(28) });
 
         // 左侧类型色条
         var accentBrush = r switch
@@ -570,17 +649,58 @@ public partial class MainWindow : Window
         Grid.SetColumn(contentCol, 1);
         row.Children.Add(contentCol);
 
+        // 右侧删除按钮（垂直居中，hover 变红）
+        var deleteBtn = new Button
+        {
+            Content = "🗑",
+            Width = 24,
+            Height = 24,
+            FontSize = 12,
+            Background = Brushes.Transparent,
+            Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xB0)),
+            BorderThickness = new Thickness(0),
+            Cursor = Cursors.Hand,
+            Tag = r.Id,
+            ToolTip = "删除此记录",
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 0, 4, 0),
+        };
+        deleteBtn.MouseEnter += (_, _) => deleteBtn.Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0x76, 0x75));
+        deleteBtn.MouseLeave += (_, _) => deleteBtn.Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xB0));
+        deleteBtn.Click += DeleteRecordButton_Click;
+        Grid.SetColumn(deleteBtn, 2);
+        row.Children.Add(deleteBtn);
+
         var item = new ListBoxItem { Content = row, Tag = r };
         return item;
     }
 
     private void HistoryList_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
+        // 点击的是删除按钮则跳过复制+重排（由 DeleteRecordButton_Click 处理）
+        if (IsFromDeleteButton(e.OriginalSource))
+        {
+            return;
+        }
         if (HistoryList.SelectedItem is ListBoxItem lbi && lbi.Tag is ClipboardRecord record)
         {
             _clipboardService.CopyToClipboard(record);
             _ = _history.ReorderToTopAsync(record.Id);
         }
+    }
+
+    private static bool IsFromDeleteButton(object source)
+    {
+        // 向上找视觉树，判断是否在 Button 中
+        var fe = source as FrameworkElement;
+        while (fe != null)
+        {
+            if (fe is Button) return true;
+            fe = fe.Parent as FrameworkElement
+                 ?? (fe.TemplatedParent as FrameworkElement);
+        }
+        return false;
     }
 
     private void ApplySettingsToWindow()

@@ -106,25 +106,42 @@
             <Grid Grid.Row="0" Height="36" Background="#22FFFFFF"
                   MouseLeftButtonDown="TitleBar_OnMouseLeftButtonDown">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Text="Hsp Copier"
-                           VerticalAlignment="Center" Margin="12,0,0,0"
+                           VerticalAlignment="Bottom" Margin="12,0,0,7"
                            FontWeight="SemiBold" Foreground="White"/>
-                <Button Grid.Column="1" x:Name="PinButton"
+                <Border Grid.Column="1" x:Name="VersionBadge"
+                        HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                        Margin="8,0,0,5"
+                        Background="#33000000" CornerRadius="9"
+                        Padding="7,2" ToolTip="当前版本">
+                    <TextBlock x:Name="VersionText" Text="v0.0.0"
+                               Foreground="#CCFFFFFF" FontSize="10"
+                               FontWeight="Medium"/>
+                </Border>
+                <Button Grid.Column="2" x:Name="PinButton"
                         Content="📌" Width="32" Height="28"
                         Background="Transparent" Foreground="White"
                         BorderThickness="0" Click="PinButton_Click"
                         ToolTip="固定 / 取消固定（固定后强制不变形）"/>
-                <Button Grid.Column="2" x:Name="SettingsButton"
+                <Button Grid.Column="3" x:Name="SettingsButton"
                         Content="⚙" Width="32" Height="28"
                         Background="Transparent" Foreground="White"
                         BorderThickness="0" Click="SettingsButton_Click"
                         ToolTip="设置"/>
-                <Button Grid.Column="3" x:Name="CloseButton"
+                <Button Grid.Column="4" x:Name="ClearAllButton"
+                        Content="🗑" Width="32" Height="28"
+                        Background="Transparent" Foreground="White"
+                        BorderThickness="0" Click="ClearAllButton_Click"
+                        FontSize="13"
+                        ToolTip="清空全部记录（再次点击确认）"/>
+                <Button Grid.Column="5" x:Name="CloseButton"
                         Content="✕" Width="32" Height="28"
                         Background="Transparent" Foreground="White"
                         BorderThickness="0" Click="CloseButton_Click"
@@ -179,6 +196,17 @@
                     Padding="16,8" Visibility="Collapsed"
                     Opacity="0">
                 <TextBlock Text="再次点击 ✕ 关闭应用"
+                           Foreground="White" FontSize="12"/>
+            </Border>
+
+            <!-- 清空记录提示浮动层 -->
+            <Border Grid.Row="1" x:Name="ClearHintBorder"
+                    HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                    Margin="0,0,0,20"
+                    Background="#E6000000" CornerRadius="8"
+                    Padding="16,8" Visibility="Collapsed"
+                    Opacity="0">
+                <TextBlock Text="再次点击 🗑 清空全部记录"
                            Foreground="White" FontSize="12"/>
             </Border>
 
