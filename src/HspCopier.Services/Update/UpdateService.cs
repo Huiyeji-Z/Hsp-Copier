@@ -240,28 +240,54 @@ public sealed class UpdateService : IUpdateService
 
         try
         {
-            // Velopack 0.0.359: UpdateManager 构造签名是 (string url, ...可选参数)
-            // 直接传 GitHub Releases 的根 URL，不需要 GithubSource 对象
+            // Velopack 0.0.359 提供两个 UpdateManager 构造：
+            //   1. UpdateManager(string urlOrPath, UpdateOptions?, ILogger?, IVelopackLocator?)
+            //   2. UpdateManager(IUpdateSource source, UpdateOptions?, ILogger?, IVelopackLocator?)
+            // GitHub Releases 必须用 GithubSource（通过 api.github.com 列 releases，否则
+            // SimpleWebSource 会拼成 <repo>/releases.win.json 直接 GET，导致 404）。
             var repoUrl = $"https://github.com/{AppConstants.GitHubOwner}/{AppConstants.GitHubRepo}";
             _updateManagerType = typeof(UpdateManager);
 
-            // 优先匹配只接受 string 的构造函数
-            var ctor = _updateManagerType.GetConstructors()
-                .Where(c => c.GetParameters().Length >= 1
-                    && c.GetParameters()[0].ParameterType == typeof(string))
-                .OrderBy(c => c.GetParameters().Length)
-                .FirstOrDefault();
-            if (ctor == null)
+            // 反射构造 GithubSource
+            var sourcesAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                .FirstOrDefault(a => a.GetName().Name == "Velopack.Sources")
+                ?? typeof(UpdateManager).Assembly;
+            var gitHubSourceType = sourcesAssembly.GetTypes().FirstOrDefault(t => t.Name == "GithubSource");
+            if (gitHubSourceType == null)
             {
-                _ensureManagerError = "UpdateManager constructor with string first parameter not found";
-                _logger.LogError("UpdateManager constructor with string first parameter not found");
+                _ensureManagerError = "GithubSource type not found in assembly " + sourcesAssembly.FullName;
+                _logger.LogError("GithubSource type not found");
                 return;
             }
 
-            var args = new List<object?> { repoUrl };
-            // 其余可选参数默认 null
-            while (args.Count < ctor.GetParameters().Length) args.Add(null);
-            _mgr = ctor.Invoke(args.ToArray());
+            // GithubSource(string repoUrl, string? accessToken, bool prerelease, IFileDownloader? downloader = null)
+            var sourceCtor = gitHubSourceType.GetConstructors()
+                .FirstOrDefault(c => c.GetParameters().Length >= 3
+                    && c.GetParameters()[0].ParameterType == typeof(string));
+            if (sourceCtor == null)
+            {
+                _ensureManagerError = "GithubSource constructor with (string, string?, bool) not found";
+                _logger.LogError("GithubSource constructor not found");
+                return;
+            }
+            var sourceArgs = new List<object?> { repoUrl, null, false };
+            while (sourceArgs.Count < sourceCtor.GetParameters().Length) sourceArgs.Add(null);
+            var source = sourceCtor.Invoke(sourceArgs.ToArray());
+
+            // 用 UpdateManager(IUpdateSource source, ...) 构造
+            var iUpdateSourceType = _updateManagerType.GetConstructors()
+                .FirstOrDefault(c => c.GetParameters().Length >= 1
+                    && c.GetParameters()[0].ParameterType.IsInterface
+                    && c.GetParameters()[0].ParameterType.Name == "IUpdateSource");
+            if (iUpdateSourceType == null)
+            {
+                _ensureManagerError = "UpdateManager(IUpdateSource, ...) constructor not found";
+                _logger.LogError("UpdateManager(IUpdateSource, ...) constructor not found");
+                return;
+            }
+            var mgrArgs = new List<object?> { source };
+            while (mgrArgs.Count < iUpdateSourceType.GetParameters().Length) mgrArgs.Add(null);
+            _mgr = iUpdateSourceType.Invoke(mgrArgs.ToArray());
         }
         catch (Exception ex)
         {
