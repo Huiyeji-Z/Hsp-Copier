@@ -3,7 +3,7 @@
 
 param(
     [string]$Version = "0.1.0",
-    [string]$Channel = "stable"
+    [string]$Channel = "win"
 )
 
 $ErrorActionPreference = "Stop"
